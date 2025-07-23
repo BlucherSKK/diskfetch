@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sqlite3.h>
+#include "diskfetch.h"
+
+
+// open base
+void bd_open(sqlite3 *disk_bd, int ecode){
+  
+  if (sqlite3_open("diskfetch.db", &disk_bd) != SQLITE_OK) {
+    ecode = DB_NOT_FOUND;
+  }
+}
+
+

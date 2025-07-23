@@ -46,7 +46,7 @@
  *			   consumed, but may not indicate an NVM subsystem failure.
  *			   The value is allowed to exceed 100.
  * @power_cycles:	Power Cycles: Contains the number of power cycles.
- * @size:           Size of disk in bytes.        
+* @size:           Size of disk in bytes.        
 **/
 struct disk_info_page{
     int                    temp;
@@ -57,12 +57,24 @@ struct disk_info_page{
     long long unsigned int hours;
 };
 
+struct disk_db_info{
+  int vendor;
+  char *name;
+  int color;
+  char *ascii_path;
+};
+
 enum Ecodec{
     NOTHING = 0,
     FILE_SISTEM_EROR = 101,
     GET_SMART_NVME_ERROR = 102,
     GET_SMART_ATA_ERROR = 103,
     UNVALIDABLE_CLI_ARGUMENT = 104,
+    DB_NOT_FOUND,
+    DB_REQUEST_CONSTRUCT_FAIL,
+    DB_CUSTOM_MSG,
+    DB_PREPARE_FAIL,
+    DB_INFO_NOT_FOUND,
     DISK_NOT_FOUND = 404,
 };
 

@@ -74,7 +74,7 @@ struct disk_info_page get_sata_info_page(char* path, int* Ecode)
         sum_codes += *i;
     }
     
-    *Ecode = (sum_codes!=0 ? GET_SMART_ATA_ERROR : 0);
+    *Ecode = sum_codes!=0 ? GET_SMART_ATA_ERROR : 0;
 
     return resault;
     
