@@ -9,36 +9,16 @@
 #include <unistd.h>
 
 
-int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii)
+int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii, struct disk_db_info info)
 {   
     for(int i = 0; i < len_ascii; i++){
         if(i < 9){
-            printf("%s %s", ascii[i], get_info_string(i, "abcdbefgh", disk_info));
+            printf("%s %s", ascii[i], get_info_string(i, "abcdbefgh", disk_info, info));
         }else{
             printf("%s\n", ascii[i]);
         }
     }
     return 0;
-}
-
-char* get_vender_name(int v_code)
-{
-    switch (v_code) {
-        case SAMSUNG_VCODE:
-            return "Samsung";
-        case SANDISK_VCODE:
-            return "Sandisk";
-        case KINGSTON_VCODE:
-            return "Kingston";
-        case INTEL_VCODE:
-            return "Intel";
-        case WESTERN_DIGITAL_VCODE:
-            return "Western Digital";
-        case SEAGATE_VCODE:
-            return "Seagate";
-        default:
-            return "unuknown";
-    }
 }
 
 int non_enter(char *s)
@@ -52,67 +32,54 @@ int non_enter(char *s)
     return 0;
 }
 
-char** get_ascii_art(int v_code, int* len_aski)
+char** get_ascii_art(struct disk_db_info* info, int* len_aski)
 {
-    char path[64];
-    char color[32];
-    switch (v_code) {
-        case SAMSUNG_VCODE:
-            strcpy(path, "assets/ascii_samsung.txt");
-            strcpy(color, BLUE);
-            break;
-        case SANDISK_VCODE:
-            strcpy(path, "assets/ascii_sandisk.txt");
-            strcpy(color, RED);
-            break;
-        case KINGSTON_VCODE:
-            strcpy(path, "assets/ascii_kingston.txt");
-            strcpy(color, RED);
-            break;
-        case INTEL_VCODE:
-            strcpy(path, "assets/ascii_intel.txt");
-            strcpy(color, BLUE);
-            break;
-        case WESTERN_DIGITAL_VCODE:
-            strcpy(path, "assets/ascii_westen.txt");
-            strcpy(color, BLUE);
-            break;
-        case SEAGATE_VCODE:
-            strcpy(path,"assets/ascii_seageate.txt");
-            strcpy(color, GREEN);
-            break;
-        default:
-            strcpy(path, "assets/ascii_default.txt");
-            strcpy(color, YELLOW);
-    } 
+    char *path = info->ascii_path;
+    char *color = info->color; 
 
     FILE* ff = fopen(path, "r");
 
-    char *string;
-    size_t string_size = 0;
-    char **array_string = malloc(sizeof(char*)*128);
-    int count = 0;
-
-    while(getline(&string, &string_size, ff) != -1){
-        array_string[count] = string;
-        count++;
-        string = 0;
-        string_size = 0;
+    char *buffer = malloc(sizeof(char)*128*128);
+    fread(buffer, 1, 128*128, ff);
+    int len_str = 0;
+    int qua_str = 0;
+    int tmp_len_str = 0;
+    for(int i = 0; i <= 128*128; i++){
+        if(buffer[i] == '\n'){
+            if(len_str > tmp_len_str){
+                len_str = tmp_len_str;
+            }
+            tmp_len_str = 0;
+            qua_str++;
+        } else if(buffer[i] == '\0'){
+            break;
+        } else {
+            tmp_len_str++;
+        }
     }
-
-    char **array_string_with_color = malloc(sizeof(char*)*(count+1));
-    char *array_c = malloc(sizeof(char)*256*(count+1));
-    for(int i = 0; i < count; i++){
-        snprintf(&array_c[i*256], 256, "%s%s"RESET, color, array_string[i]);
-        non_enter(&array_c[i*256]);
-        array_string_with_color[i] = &array_c[i*256];
+    char **ascii_art = malloc(sizeof(char *)*qua_str);
+    char *ascii_string = malloc(sizeof(char)*qua_str*(len_str+32));
+    char *tmp_str_ptr = ascii_string;
+    int num_str = 0;
+    for(int i = 0; i <= qua_str*len_str; i++){
+        if(buffer[i] == '\n'){
+            snprintf(&ascii_string[(len_str+32)*num_str], len_str+32, "%s%s%s", color, tmp_str_ptr, RESET);
+            ascii_art[num_str] = &ascii_string[(len_str+32)*num_str];
+            num_str++;
+            tmp_str_ptr = &ascii_string[(len_str+32)*num_str];
+        } else if (buffer[i] == '\0'){
+            break;
+        } else {
+            ascii_string[i%len_str] = buffer[i];
+        }
+    
     }
 
     fclose(ff);
-    free(array_string);
+    free(buffer);
 
-    *len_aski = count;
-    return array_string_with_color;
+    *len_aski = qua_str;
+    return ascii_art;
 }
 
 int free_ascii_art(char** art, int lines) 
@@ -124,7 +91,7 @@ int free_ascii_art(char** art, int lines)
     return 0;
 }
 
-char* get_info_string(int index,const char mask[], struct disk_info_page disk)
+char* get_info_string(int index,const char mask[], struct disk_info_page disk, struct disk_db_info info)
 {
     /*
         a - first string with vendor name
@@ -142,7 +109,7 @@ char* get_info_string(int index,const char mask[], struct disk_info_page disk)
     char* resault = malloc(sizeof(char)*128);
     switch (mask[index]) {
         case 'a':
-            snprintf(resault, 128, "-----%s-----\n", get_vender_name(disk.vender));
+            snprintf(resault, 128, "-----%s-----\n", info.name);
             break;
         case 'b':
             snprintf(resault, 128, HEALT_COLOR_75"-_-_-_-_-_-_-_-_-_-_-_-_\n"RESET);

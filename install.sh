@@ -1,10 +1,10 @@
 #!/bin/sh
 
-FILES="main.c nvme-interface.c health-progres-bar.c output.c ata-interface.c"
-LIBS="nvme atasmart"
+FILES="main.c nvme-interface.c health-progres-bar.c output.c ata-interface.c bd.c"
+LIBS="nvme atasmart sqlite3"
 
 
-gcc -g3 $FILES -o diskfetch $(echo "$LIBS" | sed 's/ / -l/g' | sed 's/^/-l/') 
+gcc -o3 $FILES -o diskfetch $(echo "$LIBS" | sed 's/ / -l/g' | sed 's/^/-l/') 
 
 
 mkdir /usr/local/bin/diskfetch 

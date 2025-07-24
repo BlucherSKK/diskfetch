@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <libnvme.h>
 #include <stddef.h>
+#include <sqlite3.h>
 
 #define RED     "\x1B[31m"
 #define GREEN   "\x1B[32m"
@@ -60,7 +61,7 @@ struct disk_info_page{
 struct disk_db_info{
   int vendor;
   char *name;
-  int color;
+  char *color;
   char *ascii_path;
 };
 
@@ -90,18 +91,22 @@ enum VendorCodes{
 
 struct disk_info_page get_nvme_info(char path_j[], int pathSize, int* Ecodes);
 
-char* get_vender_name(int v_code);
-
 char* get_health_bar(int health);
 
 int free_ascii_art(char** art, int lines);
 
-char* get_info_string(int index,const char mask[], struct disk_info_page disk);
+char* get_info_string(int index,const char mask[], struct disk_info_page disk, struct disk_db_info info);
 
-char** get_ascii_art(int v_code, int* len_aski);
+char** get_ascii_art(struct disk_db_info* info, int* len_aski);
 
-int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii);
+int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii, struct disk_db_info info);
 
 int model_to_vender_code(char* model);
+
+void bd_open(sqlite3 **disk_bd, int *ecode);
+
+void bd_put_disk(sqlite3 *disk_db, char *err_msg, int ecode);
+
+struct disk_db_info bd_get_disk_info(sqlite3 *disk_db, int vendor_code, char *err_msg, int ecode);
 
 struct disk_info_page get_sata_info_page(char* path, int* Ecode);
