@@ -32,56 +32,36 @@ int non_enter(char *s)
     return 0;
 }
 
+
 char** get_ascii_art(struct disk_db_info* info, int* len_aski)
 {
-    char *path = info->ascii_path;
-    char *color = info->color; 
-
-    FILE* ff = fopen(path, "r");
-
-    char *buffer = malloc(sizeof(char)*128*128);
-    fread(buffer, 1, 128*128, ff);
-    int len_str = 0;
-    int qua_str = 0;
-    int tmp_len_str = 0;
-    for(int i = 0; i <= 128*128; i++){
-        if(buffer[i] == '\n'){
-            if(len_str > tmp_len_str){
-                len_str = tmp_len_str;
-            }
-            tmp_len_str = 0;
-            qua_str++;
-        } else if(buffer[i] == '\0'){
-            break;
-        } else {
-            tmp_len_str++;
-        }
-    }
-    char **ascii_art = malloc(sizeof(char *)*qua_str);
-    char *ascii_string = malloc(sizeof(char)*qua_str*(len_str+32));
-    char *tmp_str_ptr = ascii_string;
-    int num_str = 0;
-    for(int i = 0; i <= qua_str*len_str; i++){
-        if(buffer[i] == '\n'){
-            snprintf(&ascii_string[(len_str+32)*num_str], len_str+32, "%s%s%s", color, tmp_str_ptr, RESET);
-            ascii_art[num_str] = &ascii_string[(len_str+32)*num_str];
-            num_str++;
-            tmp_str_ptr = &ascii_string[(len_str+32)*num_str];
-        } else if (buffer[i] == '\0'){
-            break;
-        } else {
-            ascii_string[i%len_str] = buffer[i];
-        }
+    FILE *ff = fopen(info->ascii_path, "r");
+    char *color = info->color;
     
+    char *string;
+    size_t string_size = 0;
+    char **array_string = malloc(sizeof(char*)*128);
+    int count = 0;
+    while(getline(&string, &string_size, ff) != -1){
+        array_string[count] = string;
+        count++;
+        string = 0;
+        string_size = 0;
+    }
+    char **array_string_with_color = malloc(sizeof(char*)*(count+1));
+    char *array_c = malloc(sizeof(char)*256*(count+1));
+    for(int i = 0; i < count; i++){
+        snprintf(&array_c[i*256], 256, "%s%s"RESET, bd_get_color(color), array_string[i]);
+        non_enter(&array_c[i*256]);
+        array_string_with_color[i] = &array_c[i*256];
     }
 
     fclose(ff);
-    free(buffer);
-
-    *len_aski = qua_str;
-    return ascii_art;
+    free(array_string);
+    
+    *len_aski = count;
+    return array_string_with_color;
 }
-
 int free_ascii_art(char** art, int lines) 
 {
     for (int i = 0; i < lines; i++) {
@@ -137,5 +117,27 @@ char* get_info_string(int index,const char mask[], struct disk_info_page disk, s
     }
 
     return resault;
-
 }
+
+char *bd_get_color(char *str)
+{
+    switch(str[0]){
+    case 'r':
+        return RED;
+    case 'g':
+        return GREEN;
+    case 'b':
+        return BLUE;
+    case 'c':
+        return CYAN;
+    case 'm':
+        return MAGENTA;
+    case 'y':
+        return YELLOW;
+    case 'w':
+        return WHITE;
+    default:
+        return YELLOW;
+    }
+}
+

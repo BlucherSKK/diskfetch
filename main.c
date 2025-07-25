@@ -40,7 +40,6 @@ int main(int argSize, char* argv[])
     }
 
     struct disk_info_page disk1;
-
     switch (argv[1][0]) {
     case '/': switch (argv[1][5]) {
         case 's':
@@ -112,6 +111,7 @@ int main(int argSize, char* argv[])
     int cont;
     char **ascii = get_ascii_art(&db_info, &cont);
     print_disk_info(disk1, ascii, cont, db_info);
+    bd_info_free(&db_info);
     free(ascii);
     sqlite3_close(disks);
     

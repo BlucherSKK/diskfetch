@@ -107,6 +107,9 @@ void bd_put_disk(sqlite3 *disk_db, char *err_msg, int ecode){
 struct disk_db_info bd_get_disk_info(sqlite3 *disk_db, int vendor_code, char *err_msg, int ecode)
 {
     struct disk_db_info resault;
+    resault.name = malloc(sizeof(char)*32);
+    resault.ascii_path = malloc(sizeof(char)*32);
+    resault.color = malloc(sizeof(char)*32);
     char *request = malloc(sizeof(char) * 256);
     snprintf(request, 256, "SELECT name, color, ascii FROM disks WHERE vendor = %d;", vendor_code);
     sqlite3_stmt *stm;
@@ -116,10 +119,12 @@ struct disk_db_info bd_get_disk_info(sqlite3 *disk_db, int vendor_code, char *er
         const unsigned char *name = sqlite3_column_text(stm, 0);
         const unsigned char *color = sqlite3_column_text(stm, 1);
         const unsigned char *ascii = sqlite3_column_text(stm, 2);
-        resault.name = (char *)name;
-        resault.color = (char *)color;
-        resault.ascii_path = (char *)ascii;
+        //printf("%s\n%s\n%s", (char *)name, color, ascii);
+        memccpy(resault.name, (char *)name, 0, 32);
+        memccpy(resault.ascii_path, (char *)ascii, 0, 32);
+        memccpy(resault.color, (char *)color, 0, 32);
         resault.vendor = vendor_code;
+        resault.heap = true;
         sqlite3_finalize(stm);
     } else {
         ecode = NOTHING;
@@ -127,9 +132,19 @@ struct disk_db_info bd_get_disk_info(sqlite3 *disk_db, int vendor_code, char *er
         resault.ascii_path = "assets/ascii_default.txt";
         resault.color = YELLOW;
         resault.vendor = 0;
+        resault.heap = false;
         free(request);
     }
     
     return resault;
 }
 
+int bd_info_free(struct disk_db_info *info)
+{
+    if(info->heap){
+        free(info->ascii_path);
+        free(info->name);
+        free(info->color); 
+    }
+    return 0;
+}

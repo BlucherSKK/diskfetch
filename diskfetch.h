@@ -59,10 +59,11 @@ struct disk_info_page{
 };
 
 struct disk_db_info{
-  int vendor;
-  char *name;
-  char *color;
-  char *ascii_path;
+    int vendor;
+    char *name;
+    char *color;
+    char *ascii_path;
+    bool heap;
 };
 
 enum Ecodec{
@@ -91,7 +92,11 @@ enum VendorCodes{
 
 struct disk_info_page get_nvme_info(char path_j[], int pathSize, int* Ecodes);
 
-char* get_health_bar(int health);
+char *get_health_bar(int health);
+
+char *bd_get_color(char *str);
+
+int bd_info_free(struct disk_db_info *info);
 
 int free_ascii_art(char** art, int lines);
 
