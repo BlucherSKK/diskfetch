@@ -1,3 +1,4 @@
+
 #include "diskfetch.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,7 @@ int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii
             printf("%s\n", ascii[i]);
         }
     }
+    puts("\n");
     return 0;
 }
 

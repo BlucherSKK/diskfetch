@@ -88,16 +88,16 @@ struct disk_info_page get_sata_info_page(char* path, int* Ecode)
 int model_to_vender_code(char* model)
 {
     switch (model[0]) {
-        case 'W':
-            switch (model[1]) {
-                case 'D': return WESTERN_DIGITAL_VCODE;
-                default: return UNDERFIND_VCODE;            
-            }
-        case 'S':
-            switch (model[1]) {
-                case 'T': return SEAGATE_VCODE;
-                default: return UNDERFIND_VCODE;
-            }
-        default: return UNDERFIND_VCODE;
+    case 'W':
+        switch (model[1]) {
+        case 'D': return 0x10DE;
+        default: return 0;
+        }
+    case 'S':
+        switch (model[1]) {
+        case 'T': return 0x1B4B;
+        default: return 0;
+        }
+    default: return 0;
     }
 }

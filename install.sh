@@ -1,6 +1,6 @@
 #!/bin/sh
 
-FILES="main.c nvme-interface.c health-progres-bar.c output.c ata-interface.c bd.c"
+FILES="main.c nvme-interface.c health-progres-bar.c output.c ata-interface.c bd.c locale.c"
 LIBS="nvme atasmart sqlite3"
 
 

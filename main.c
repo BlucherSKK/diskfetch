@@ -20,14 +20,11 @@
 int main(int argSize, char* argv[])
 {
     sqlite3 *disks;
+    Locl locl = df_get_locl();
     char *bd_msg = malloc(sizeof(char) * 256);
     int Ecode = NOTHING;
     bd_open(&disks, &Ecode);
-    if(Ecode == DB_NOT_FOUND){
-        printf("Pezda");
-        sqlite3_close(disks);
-        goto pre_complete;
-    }
+    if(Ecode == DB_NOT_FOUND){goto lets_chek_ecode;}
     
     if(argSize < 2){
         Ecode = UNVALIDABLE_CLI_ARGUMENT;
@@ -53,69 +50,45 @@ int main(int argSize, char* argv[])
                 break;
             }
         default:
-            perror("\n"RED"Diskfetch: i don`t know what is a disk"RESET"\n");
-            return -1;
+            Ecode = UNK_DISK_TYPE;
+            goto lets_chek_ecode;
         }
         break;
 
     case '-': switch (argv[1][1]) {
         case 'h':
-            puts("\ndiskfetch - it's like neofetch, but for disk\nsyntax:\n\t\tdiskfetch <flags> <path to your disk>\n\nflags:\n\t-h\t- outputs this information\n\t-v\t- outputs version\n");
+            puts(df_get_lc_msg(locl, Help));
             goto pre_complete;
         case 'v':
-            puts("diskfetch-1.0.1");
+            puts(df_get_lc_msg(locl, Version));
             goto pre_complete;
         case 'p':
             bd_put_disk(disks, bd_msg, Ecode);
             goto lets_chek_ecode;
         default:
-            perror("Error: i don`t know whot is a flag\n");
-            return -1;
+            Ecode = UNK_FLAG;
+            goto lets_chek_ecode;
         }
         break;
 
     default:
-        perror(RED"Error: underfind argument"RESET);
-        return -1;
+        Ecode = UNVALIDABLE_CLI_ARGUMENT;
+        goto lets_chek_ecode;
     }
     struct disk_db_info db_info = bd_get_disk_info(disks, disk1.vender, bd_msg, Ecode);
+    if(Ecode != NOTHING){return puts(df_get_lc_err(locl, Ecode));}
 
  lets_chek_ecode:
-    switch (Ecode) {
-    case NOTHING:
-        break;
-    case UNVALIDABLE_CLI_ARGUMENT:
-        perror(RED"\nERROR: invalid command line argument\n"RESET);
-        return -1;
-    case DISK_NOT_FOUND:
-        perror(RED"\nERROR: disk not found\n"RESET);
-        return -1;
-    case FILE_SISTEM_EROR: 
-        perror(RED"\nError: get info about disk from file sistem fail\n"RESET);
-        return -1;
-    case GET_SMART_NVME_ERROR:
-        perror("\nDiskfetch can found yuor disk but:\n"RED"Error: get info about nvme fail\n"RESET);
-        return -1;
-    case GET_SMART_ATA_ERROR:
-        perror("\nDiskfetch can found yuor disk but:\n"RED"Error: get info about sata/ata device fail\n"RESET);
-        return -1;
-    case DB_CUSTOM_MSG:
-        perror(bd_msg);
-        return -1;
-    default:
-        perror(YELLOW"\nUnuknown error\n"RESET);
-        return -1;
-    }
-    
+    free(bd_msg);
+    sqlite3_close(disks);
+    if(Ecode != NOTHING){return puts(df_get_lc_err(locl, Ecode));}
     
     int cont;
     char **ascii = get_ascii_art(&db_info, &cont);
     print_disk_info(disk1, ascii, cont, db_info);
     bd_info_free(&db_info);
     free(ascii);
-    sqlite3_close(disks);
-    
+ 
  pre_complete:
-    free(bd_msg);
     return 0;
 }

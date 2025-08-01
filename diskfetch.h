@@ -26,9 +26,11 @@
 #define HEALT_COLOR_45      "\x1B[38;2;255;255;85m"
 #define HEALT_COLOR_30      "\x1B[38;2;255;150;85m"
 #define HEALT_COLOR_15      "\x1B[38;2;255;50;85m"
-#define HEALT_COLOR_0       "\x1B[38;2;255;0;85m"
+#define HEALT_COLOR_0 "\x1B[38;2;255;0;85m"
 
-#define RESET   "\x1B[0m"
+#define VER "1.0.3"
+
+#define RESET "\x1B[0m"
 /** 
  *   Struct for contain and transfer info about disk
  *   
@@ -66,35 +68,42 @@ struct disk_db_info{
     bool heap;
 };
 
-enum Ecodec{
-    NOTHING = 0,
-    FILE_SISTEM_EROR = 101,
-    GET_SMART_NVME_ERROR = 102,
-    GET_SMART_ATA_ERROR = 103,
-    UNVALIDABLE_CLI_ARGUMENT = 104,
+typedef enum{
+    RU,
+    EN
+} Locl;
+
+typedef enum {
+  Help,
+  Version,
+
+} Msg;
+
+typedef enum{
+    NOTHING,
+    UNK_FLAG,
+    FILE_SISTEM_EROR,
+    UNK_DISK_TYPE,
+    GET_SMART_NVME_ERROR,
+    GET_SMART_ATA_ERROR,
+    UNVALIDABLE_CLI_ARGUMENT,
     DB_NOT_FOUND,
     DB_REQUEST_CONSTRUCT_FAIL,
     DB_CUSTOM_MSG,
     DB_PREPARE_FAIL,
     DB_INFO_NOT_FOUND,
-    DISK_NOT_FOUND = 404,
-};
+    DISK_NOT_FOUND,
+} Ecode;
 
-enum VendorCodes{
-    WESTERN_DIGITAL_VCODE = 0x10DE,
-    SAMSUNG_VCODE = 0x144D,
-    KINGSTON_VCODE = 0x1E0F,
-    INTEL_VCODE = 0x8086,
-    SEAGATE_VCODE = 0x1B4B,
-    SANDISK_VCODE = 0x15B7,
-    UNDERFIND_VCODE = -1
-};
 
 struct disk_info_page get_nvme_info(char path_j[], int pathSize, int* Ecodes);
 
 char *get_health_bar(int health);
 
 char *bd_get_color(char *str);
+
+char *df_get_lc_msg(Locl lc, Msg msg);
+Locl df_get_locl();
 
 int bd_info_free(struct disk_db_info *info);
 
@@ -109,6 +118,8 @@ int print_disk_info(struct disk_info_page disk_info, char** ascii, int len_ascii
 int model_to_vender_code(char* model);
 
 void bd_open(sqlite3 **disk_bd, int *ecode);
+
+char *df_get_lc_err(Locl lc, Ecode err);
 
 void bd_put_disk(sqlite3 *disk_db, char *err_msg, int ecode);
 
