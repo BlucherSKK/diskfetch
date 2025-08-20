@@ -28,7 +28,7 @@
 #define HEALT_COLOR_15      "\x1B[38;2;255;50;85m"
 #define HEALT_COLOR_0 "\x1B[38;2;255;0;85m"
 
-#define VER "1.0.3"
+#define VER "1.0.2"
 
 #define RESET "\x1B[0m"
 /** 

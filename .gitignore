@@ -1,4 +1,4 @@
-testing/*
+testing
 *~
 #*
 '*
@@ -7,3 +7,4 @@ testing/*
 .gitignore
 *.bin
 *.bash
+releses
